@@ -1,0 +1,20 @@
+{
+  "name": "SWGVG",
+  "version": "1.0.0",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "fabricionote",
+  "contributors": [],
+  "dependencies": {
+    "express" : "*",    
+    "bootstrap": "3.3.7",
+    "express": "4.16.2",
+    "jquery": "3.2.1",
+    "socket.io": "2.0.4"
+  }
+}
