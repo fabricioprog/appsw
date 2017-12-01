@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+
+
+        <link href="estilo.css" rel="stylesheet"/> 
+        <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/> 
+        <link href="../node_modules/bootstrap-select-master/dist/css/bootstrap-select.min.css" rel="stylesheet"/> 
+
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+        <script src="../node_modules/jquery/dist/jquery.min.js" ></script>
+        <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="../node_modules/bootstrap-select-master/dist/js/bootstrap-select.min.js"></script>
+        <script src="http://191.190.75.54:8081/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <div class="bg"></div>
+
+        <div class="container">
+            <div class="alert alert-danger alerta" style="display: none">teste</div>
+            <div class="row ">
+                <div class="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1 col-xs-12">
+                    <div class="panel panel-default pnPrincipal">
+                        <div class="panel-heading">Sistema de Ataques da Siege (Summoners War)</div>
+                        <div class="panel-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Base</th>
+                                        <th scope="col">Defesas</th>
+                                        <th scope="col">Finalizar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!--<tr class="bg-danger">
+                                        <td><h3>1</h3></td>
+                                        <td>
+                                            <button class="btn btn-default btn_def">Defesa 1</button>
+                                            <button class="btn btn-default btn_def">Defesa 2</button>
+                                            <button class="btn btn-default btn_def">Defesa 3</button><br>
+                                            <button class="btn btn-default btn_def">Defesa 4</button>
+                                            <button class="btn btn-default btn_def">Defesa 5</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-success btn_finalizar">
+                                                Finalizar
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                    <tr class="bg-warning">
+                                        <td><h3>2</h3></td>
+                                        <td>
+                                            <button class="btn btn-default btn_def">Defesa 1</button>
+                                            <button class="btn btn-default btn_def">Defesa 2</button>
+                                            <button class="btn btn-default btn_def">Defesa 3</button><br>
+                                            <button class="btn btn-default btn_def">Defesa 4</button>
+                                            <button class="btn btn-default btn_def">Defesa 5</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-success btn_finalizar">
+                                                Finalizar
+                                            </button>
+                                        </td>
+
+                                    </tr>-->
+                                </tbody>
+                            </table>
+
+                            <div class="row">
+                                <div class="form-grou p col-md-3 col-sm-6">
+                                    <select id='sel_base' class="form-control selectpicker">
+                                        <option value="0">Base</option>
+                                        <option data-divider="true"></option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3 col-sm-6">
+                                    <select id="sel_cor" class="form-control selectpicker">
+                                        <option value="0">Cor</option>
+                                        <option data-divider="true"></option>
+                                        <option value="1">Vermelho</option>
+                                        <option value="2">Amarelo</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3 col-sm-12 col-xs-12 pull-right">
+                                    <button id='btn_designar' class="form-control btn btn-success">
+                                        Designar
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>.
+                </div>
+            </div>
+        </div>
+        <script>
+            var socket = io('http://191.190.75.54:8081');
+            var att = false;
+            socket.on('att_bases', function (bases) {
+                //lemrar de criar rotina para caso a net cair e voltar
+                if (!att) {
+                    att_on_load_bases(bases);
+                    att = true;
+                }
+            });
+            $(document).ready(function () {
+                $btn_designar = $('#btn_designar');
+                $btn_def = $('.btn_def');
+                $sel_base = $('#sel_base');
+                $sel_cor = $('#sel_cor');
+                $btn_finalizar = $('.btn_finalizar');
+                $tabela = $('table tbody');
+                $(document).on('click', '.btn_finalizar', function () {
+                    id = $(this).parents('tr').data('id');
+                    socket.emit('remove_def', id);
+                });
+                $(document).on('click', '.btn-def', function () {
+                    console.log('ok');
+                    let def = {"base": $(this).parents('tr').data('id'),
+                        "defesa": $(this).data('id')};
+                    socket.emit('change_def', def);
+                });
+                socket.on('up_def', function (msg) {
+                    add_ataque(msg);
+                });
+                socket.on('change_def', function (def) {
+                    $defesa = $('tr[data-id=' + def.base + '] button[data-id=' + def.defesa + ']');
+                    if ($defesa.hasClass('btn-default')) {
+                        $defesa.removeClass('btn-default');
+                        $defesa.addClass('btn-info');
+                    } else {
+                        $defesa.removeClass('btn-info');
+                        $defesa.addClass('btn-default');
+                    }
+                });
+                socket.on('remove_def', function (index) {
+                    $("tr[data-id=" + index + "]").hide('200', function () {
+                        $(this).remove();
+                    });
+                });
+                $btn_designar.click(function () {
+                    let error = false;
+                    $alerta = $('.alerta');
+                    $alerta.stop();
+                    $alerta.slideUp(10);
+                    $alerta.html("");
+                    if ($sel_base.val() == "0") {
+                        $alerta.append("Campo de Base Obrigatória <br>");
+                        error = true;
+                    }
+
+                    if ($sel_cor.val() == "0") {
+                        $alerta.append("Campo de Cor da Base Obrigatória");
+                        $("div.demo").scrollTop(300);
+                        error = true;
+                    }
+
+                    if (error) {
+                        $("html, body").animate({scrollTop: 0}, '100');
+                        $alerta.slideDown(500).delay(3000).slideUp(500, function () {
+                            $(this).slideUp(500);
+                        });
+                        return false;
+                    }
+                    let info = {"base": $sel_base.val(), "cor": $sel_cor.val()}
+                    socket.emit('up_def', info);
+                });
+            });
+            function att_on_load_bases(bases) {
+                console.log(bases);
+                $.each(bases, function (index, base) {
+                    add_ataque(base);
+                });
+            }
+
+            function def_cor_base(cor) {
+                return cor ? "btn-info" : "btn-default";
+            }
+            function add_ataque(info) {
+                if(info=== null){
+                    return false;
+                }
+                
+                var cor_class = "";
+                switch (info.cor) {
+                    case "1":
+                        cor_class = "bg-danger";
+                        break;
+                    case "2":
+                        cor_class = "bg-warning";
+                        break;
+                    default:
+                        break;
+                }
+
+                var linha = '<tr data-id="' + info.id + '" class="' + cor_class + '" style="display:none">\n\
+                        <td><h3>' + info.base + '</h3></td>\n\
+                                        <td>';
+                for (i = 0; i < 5; i++) {
+                    linha += '<button data-id="' + i + '" class="btn btn-def ' + def_cor_base(info.bases[i]) + '">Defesa ' + (i + 1) + '</button>';
+                }
+
+                linha += '<td>\n\
+                                    <button class="btn btn-success btn_finalizar">\n\
+                                Finalizar\n\
+                                </button>\n\
+                                    </td>';
+
+
+                $tabela.append(linha);
+                $tabela.children('tr:last').show('200');
+            }
+        </script>    
+    </body>
+
+</html>
+
